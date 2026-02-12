@@ -64,5 +64,6 @@ CREATE TABLE IF NOT EXISTS docs (
 - `lib/db.ts` SQLite 初始化与 CRUD
 - `app/api/docs/route.ts` 列表与新建 API
 - `app/api/docs/[id]/route.ts` 单文档读取与更新 API
-- `app/page.tsx` 前端编辑器 + 实时预览 + 自动保存
+- `app/page.tsx` 首页（Landing）
+- `app/workspace/page.tsx` 前端编辑器 + 实时预览 + 自动保存
 - `app/globals.css` 页面风格与响应式布局

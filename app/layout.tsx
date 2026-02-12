@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans, Playfair_Display } from "next/font/google";
+import ThemeSync from "./theme-sync";
 import "./globals.css";
 
 const bodyFont = IBM_Plex_Sans({
@@ -35,6 +36,7 @@ export default function RootLayout({
       <body
         className={`${bodyFont.variable} ${monoFont.variable} ${displayFont.variable} app-body`}
       >
+        <ThemeSync />
         {children}
       </body>
     </html>
