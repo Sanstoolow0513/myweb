@@ -2,93 +2,99 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "首页 | Markdown Workspace",
-  description: "Markdown Workspace 首页，进入 /workspace 即可开始编辑、预览与自动保存。",
+  title: "Sanstoolow 小站",
+  description: "Sanstoolow 的个人主页入口，可前往 Blog 与 Workspace。",
 };
 
-const FEATURES = [
+const ENTRIES = [
   {
-    title: "即时预览",
-    description: "左写右看，Markdown 渲染实时同步，写作节奏不断档。",
+    title: "Blog",
+    description: "静态展示页，收纳开发日志、学习笔记与阶段复盘。",
+    href: "/blog",
+    action: "进入 Blog",
   },
   {
-    title: "自动保存",
-    description: "输入后自动触发保存，必要时也可一键手动保存。",
+    title: "Workspace",
+    description: "双栏 Markdown 工作台，支持自动保存与移动端切换预览。",
+    href: "/workspace",
+    action: "打开 Workspace",
   },
   {
-    title: "本地持久化",
-    description: "基于 SQLite 存储文档，刷新或重启后内容依旧保留。",
-  },
-  {
-    title: "移动端可用",
-    description: "在手机上可切换编辑与预览视图，保持专注阅读与输入。",
+    title: "Build Notes",
+    description: "小站目前使用 Next.js 16 + React 19 + SQLite，先轻量可用，再持续演进。",
+    href: "/blog",
+    action: "查看记录",
   },
 ];
 
-const STEPS = [
-  "进入 Workspace",
-  "新建文档并开始书写",
-  "实时预览并自动保存",
+const UPDATES = [
+  {
+    date: "2026-02",
+    text: "首页改为小站入口，新增 Blog 静态展示页。",
+  },
+  {
+    date: "2026-01",
+    text: "Workspace 支持移动端编辑/预览切换与自动保存。",
+  },
+  {
+    date: "2025-12",
+    text: "初版 Markdown 文档管理能力上线。",
+  },
 ];
 
-export default function LandingPage() {
+export default function HomePage() {
   return (
-    <main className="landing-main">
-      <section className="landing-hero">
-        <div className="landing-shell">
-          <p className="landing-kicker">NEXT.JS 16 · MARKDOWN WORKSPACE</p>
-          <h1 className="landing-title">把灵感写成结构化文档，随时继续。</h1>
-          <p className="landing-subtitle">
-            这是一个轻量的 Markdown 工作台：列表管理、双栏编辑预览、自动保存，一次打开就能立即开始。
+    <main className="site-main">
+      <section className="site-hero">
+        <div className="site-shell">
+          <p className="site-kicker">SANSTOOLOW STATION</p>
+          <h1 className="site-title">Sanstoolow 的小站主页</h1>
+          <p className="site-subtitle">
+            在这里记录构建过程，也保留日常创作入口。Blog 用来沉淀内容，Workspace 用来快速起草与整理。
           </p>
 
-          <div className="landing-actions">
-            <Link className="landing-btn landing-btn-primary" href="/workspace">
-              进入 Workspace
+          <div className="site-actions">
+            <Link className="site-btn site-btn-primary" href="/blog">
+              去看 Blog
             </Link>
-            <a className="landing-btn landing-btn-secondary" href="#features">
-              查看功能
-            </a>
-          </div>
-
-          <div className="landing-step-row" aria-label="How it works">
-            {STEPS.map((step, index) => (
-              <div key={step} className="landing-step">
-                <span className="landing-step-index">0{index + 1}</span>
-                <span>{step}</span>
-              </div>
-            ))}
+            <Link className="site-btn site-btn-secondary" href="/workspace">
+              打开 Workspace
+            </Link>
           </div>
         </div>
       </section>
 
-      <section id="features" className="landing-section">
-        <div className="landing-shell">
-          <div className="landing-section-head">
-            <h2>常见而顺手的写作工作流</h2>
-            <p>你在 Next.js 项目里期待的现代化入口页 + 工具页分离方案，这里已经准备好。</p>
-          </div>
-
-          <div className="landing-grid">
-            {FEATURES.map((feature) => (
-              <article key={feature.title} className="landing-card">
-                <h3>{feature.title}</h3>
-                <p>{feature.description}</p>
+      <section className="site-section">
+        <div className="site-shell">
+          <div className="site-grid" aria-label="Site entries">
+            {ENTRIES.map((entry) => (
+              <article key={entry.title} className="site-card">
+                <h2>{entry.title}</h2>
+                <p>{entry.description}</p>
+                <Link className="site-card-link" href={entry.href}>
+                  {entry.action}
+                </Link>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="landing-section landing-section-cta">
-        <div className="landing-shell landing-cta-box">
-          <div>
-            <h2>准备好就开始写吧</h2>
-            <p>从首页进入 /workspace，你的文档会在本地持续保存，适合日常笔记和草稿沉淀。</p>
+      <section className="site-section site-section-compact">
+        <div className="site-shell">
+          <div className="site-section-head">
+            <h2>近期动态</h2>
+            <p>先把结构和写作节奏稳定下来，后续再逐步扩展文章详情与内容分类。</p>
           </div>
-          <Link className="landing-btn landing-btn-primary" href="/workspace">
-            打开工作台
-          </Link>
+
+          <ul className="site-update-list">
+            {UPDATES.map((item) => (
+              <li key={`${item.date}-${item.text}`} className="site-update-item">
+                <span className="site-update-date">{item.date}</span>
+                <span>{item.text}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
     </main>

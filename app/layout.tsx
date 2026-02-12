@@ -22,8 +22,8 @@ const displayFont = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Markdown Workspace",
-  description: "A simple Markdown editor with live preview and SQLite persistence.",
+  title: "Sanstoolow 小站",
+  description: "Sanstoolow 的个人小站，包含 Blog 展示页与 Markdown Workspace。",
 };
 
 export default function RootLayout({
