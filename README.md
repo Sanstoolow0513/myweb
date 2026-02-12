@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Markdown Preview Workspace
 
-## Getting Started
+一个基于 Next.js App Router 的简易 Markdown 文档工作台：
 
-First, run the development server:
+- 左侧文档列表
+- 中间编辑器
+- 右侧实时预览
+- 自动保存到本地 SQLite（可持久化）
+
+## 你需要手动安装的包
+
+按你的要求，依赖由你自行安装。建议安装：
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm add better-sqlite3 react-markdown remark-gfm
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+可选代码高亮（当前实现未强制依赖）：
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm add rehype-highlight highlight.js
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 运行
 
-## Learn More
+```bash
+pnpm dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+默认地址：`http://localhost:3000`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 最简数据库设计
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+数据库文件：`data/markdown.db`
 
-## Deploy on Vercel
+表结构（单表设计）：
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```sql
+CREATE TABLE IF NOT EXISTS docs (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  content TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+说明：
+
+- `id` 使用 UUID
+- `title` 文档标题
+- `content` Markdown 原文
+- `created_at` / `updated_at` 使用 ISO 时间字符串
+
+## API
+
+- `GET /api/docs` 获取文档列表
+- `POST /api/docs` 新建文档
+- `GET /api/docs/:id` 获取单篇文档
+- `PATCH /api/docs/:id` 更新标题或内容
+
+## 关键文件
+
+- `lib/db.ts` SQLite 初始化与 CRUD
+- `app/api/docs/route.ts` 列表与新建 API
+- `app/api/docs/[id]/route.ts` 单文档读取与更新 API
+- `app/page.tsx` 前端编辑器 + 实时预览 + 自动保存
+- `app/globals.css` 页面风格与响应式布局
