@@ -58,7 +58,7 @@ function formatTime(isoText: string): string {
   }).format(date);
 }
 
-export default function Home() {
+export default function WorkspacePage() {
   const [docs, setDocs] = useState<Doc[]>([]);
   const [activeDocId, setActiveDocId] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<SaveState>("idle");
@@ -384,56 +384,70 @@ export default function Home() {
         <p className="loading">正在加载文档...</p>
       ) : (
         <div className="workspace-grid">
-          <aside className="doc-sidebar" aria-label="Document list">
-            <div className="sidebar-head">
-              <strong>文档列表</strong>
-              <span>{docs.length} 篇</span>
+          <aside className="workspace-sidebar" aria-label="Document list">
+            <div className="workspace-header">
+              <div className="workspace-header-title">
+                <strong>文档列表</strong>
+                <span>{docs.length} 篇</span>
+              </div>
+
+              <div className="workspace-actions">
+                <span className={`workspace-status ${saveState === "saving" ? "saving" : ""}`}>
+                  {saveLabel}
+                </span>
+                <div className="workspace-actions-row">
+                  <button
+                    className="btn btn-secondary"
+                    onClick={handleManualSave}
+                    disabled={!activeDocId}
+                  >
+                    立即保存
+                  </button>
+                  <button
+                    className="btn btn-primary"
+                    onClick={handleCreateDoc}
+                    disabled={isCreating}
+                  >
+                    {isCreating ? "创建中..." : "新建"}
+                  </button>
+                </div>
+              </div>
             </div>
 
-            <div className="sidebar-actions">
-              <span className={saveChipClassName}>{saveLabel}</span>
-              <button className="btn btn-ghost" onClick={handleManualSave} disabled={!activeDocId}>
-                立即保存
-              </button>
-              <button className="btn btn-solid" onClick={handleCreateDoc} disabled={isCreating}>
-                {isCreating ? "创建中..." : "新建文档"}
-              </button>
-            </div>
-
-            <div className="doc-list">
+            <div className="workspace-doc-list">
               {docs.map((doc) => (
                 <button
                   key={doc.id}
                   className={`doc-item ${doc.id === activeDocId ? "is-active" : ""}`}
                   onClick={() => handleSelectDoc(doc.id)}
                 >
-                  <span className="doc-title">{doc.title.trim() || NEW_DOC_TITLE}</span>
-                  <span className="doc-time">最近更新 {formatTime(doc.updatedAt)}</span>
+                  <span className="doc-item-title">{doc.title.trim() || NEW_DOC_TITLE}</span>
+                  <span className="doc-item-time">更新于 {formatTime(doc.updatedAt)}</span>
                 </button>
               ))}
             </div>
           </aside>
 
-          <div className="content-shell">
+          <div className="workspace-content">
             <div className="mobile-switch" aria-label="View mode switch">
               <button
                 type="button"
-                className={mobilePane === "editor" ? "is-active" : ""}
+                className={`btn ${mobilePane === "editor" ? "is-active" : ""}`}
                 onClick={() => setMobilePane("editor")}
               >
                 编辑
               </button>
               <button
                 type="button"
-                className={mobilePane === "preview" ? "is-active" : ""}
+                className={`btn ${mobilePane === "preview" ? "is-active" : ""}`}
                 onClick={() => setMobilePane("preview")}
               >
                 预览
               </button>
             </div>
 
-            <section className={`pane ${mobilePane === "editor" ? "is-visible" : ""}`}>
-              <div className="pane-head">
+            <section className={`editor-pane ${mobilePane === "editor" ? "is-visible" : ""}`}>
+              <div className="pane-header">
                 <span>Editor</span>
                 <span>{activeDoc ? `${activeDoc.content.length} chars` : ""}</span>
               </div>
@@ -441,7 +455,7 @@ export default function Home() {
               <div className="editor-body">
                 <input
                   id="doc-title"
-                  className="editor-title"
+                  className="editor-title-input"
                   value={activeDoc?.title ?? ""}
                   placeholder="Untitled note"
                   onChange={(event) => updateActiveDoc("title", event.target.value)}
@@ -457,8 +471,8 @@ export default function Home() {
               </div>
             </section>
 
-            <section className={`pane ${mobilePane === "preview" ? "is-visible" : ""}`}>
-              <div className="pane-head">
+            <section className={`preview-pane ${mobilePane === "preview" ? "is-visible" : ""}`}>
+              <div className="pane-header">
                 <span>Preview</span>
                 <span>{activeDoc ? formatTime(activeDoc.updatedAt) : ""}</span>
               </div>

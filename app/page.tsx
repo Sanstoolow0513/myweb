@@ -44,59 +44,58 @@ const UPDATES = [
 
 export default function HomePage() {
   return (
-    <main className="site-main">
-      <section className="site-hero">
-        <div className="site-shell">
-          <p className="site-kicker">SANSTOOLOW STATION</p>
-          <h1 className="site-title">Sanstoolow 的小站主页</h1>
-          <p className="site-subtitle">
+    <main className="stagger-rise-1">
+      <div className="shell">
+        <section className="hero-section">
+          <span className="hero-kicker">./sanstoolow</span>
+          <h1 className="hero-title">Sanstoolow 小站</h1>
+          <p className="hero-subtitle">
             在这里记录构建过程，也保留日常创作入口。Blog 用来沉淀内容，Workspace 用来快速起草与整理。
           </p>
-
-          <div className="site-actions">
-            <Link className="site-btn site-btn-primary" href="/blog">
-              去看 Blog
+          <div className="hero-actions">
+            <Link className="btn btn-primary" href="/blog">
+              进入 Blog →
             </Link>
-            <Link className="site-btn site-btn-secondary" href="/workspace">
+            <Link className="btn btn-secondary" href="/workspace">
               打开 Workspace
             </Link>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="site-section">
-        <div className="site-shell">
-          <div className="site-grid" aria-label="Site entries">
-            {ENTRIES.map((entry) => (
-              <article key={entry.title} className="site-card">
+        <section>
+          <div className="entries-grid" aria-label="Site entries">
+            {ENTRIES.map((entry, index) => (
+              <article
+                key={entry.title}
+                className="card entry-card stagger-rise-2"
+                data-index={`0${index + 1}`}
+              >
                 <h2>{entry.title}</h2>
                 <p>{entry.description}</p>
-                <Link className="site-card-link" href={entry.href}>
+                <Link className="btn btn-secondary" href={entry.href}>
                   {entry.action}
                 </Link>
               </article>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="site-section site-section-compact">
-        <div className="site-shell">
-          <div className="site-section-head">
+        <section className="updates-section stagger-rise-3">
+          <div className="updates-header">
             <h2>近期动态</h2>
             <p>先把结构和写作节奏稳定下来，后续再逐步扩展文章详情与内容分类。</p>
           </div>
 
-          <ul className="site-update-list">
+          <div className="updates-list">
             {UPDATES.map((item) => (
-              <li key={`${item.date}-${item.text}`} className="site-update-item">
-                <span className="site-update-date">{item.date}</span>
-                <span>{item.text}</span>
-              </li>
+              <div key={`${item.date}-${item.text}`} className="update-item">
+                <span className="update-date">{item.date}</span>
+                <span className="update-text">{item.text}</span>
+              </div>
             ))}
-          </ul>
-        </div>
-      </section>
+          </div>
+        </section>
+      </div>
     </main>
   );
 }

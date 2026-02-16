@@ -54,27 +54,27 @@ const TOPICS = ["Frontend", "Engineering", "Learning Notes", "Design Thinking"];
 
 export default function BlogPage() {
   return (
-    <main className="blog-main">
-      <div className="blog-shell">
+    <main className="stagger-rise-1">
+      <div className="shell">
         <nav className="blog-topbar" aria-label="Blog navigation">
-          <Link className="blog-nav-link" href="/">
-            返回首页
+          <Link className="btn btn-ghost" href="/">
+            ← 返回首页
           </Link>
-          <Link className="blog-nav-link" href="/workspace">
+          <Link className="btn btn-primary" href="/workspace">
             打开 Workspace
           </Link>
         </nav>
 
         <header className="blog-hero">
-          <p className="blog-kicker">SANSTOOLOW BLOG</p>
+          <span className="blog-kicker">~/blog</span>
           <h1 className="blog-title">开发记录与思考草稿</h1>
           <p className="blog-subtitle">
             这是第一版静态展示页面，先完成目录感与浏览体验，后续再接入完整文章详情页。
           </p>
 
-          <div className="blog-tag-row" aria-label="Topics">
+          <div className="blog-topics" aria-label="Topics">
             {TOPICS.map((topic) => (
-              <span key={topic} className="blog-tag">
+              <span key={topic} className="tag">
                 {topic}
               </span>
             ))}
@@ -82,17 +82,20 @@ export default function BlogPage() {
         </header>
 
         <section className="blog-grid" aria-label="Blog posts">
-          {BLOG_POSTS.map((post) => (
-            <article key={post.slug} className="blog-card">
+          {BLOG_POSTS.map((post, index) => (
+            <article
+              key={post.slug}
+              className={`card blog-card stagger-rise-${Math.min(index + 2, 4)}`}
+            >
               <div className="blog-card-meta">
                 <span>{post.date}</span>
                 <span>{post.tag}</span>
               </div>
               <h2>{post.title}</h2>
               <p>{post.excerpt}</p>
-              <div className="blog-card-foot">
+              <div className="blog-card-footer">
                 <span>{post.readingTime}</span>
-                <span className="blog-card-state">静态展示</span>
+                <span className="tag">静态展示</span>
               </div>
             </article>
           ))}
