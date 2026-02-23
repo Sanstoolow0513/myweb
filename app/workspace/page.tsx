@@ -344,22 +344,6 @@ export default function WorkspacePage() {
     return signatureOf(activeDoc) !== syncedSignaturesRef.current.get(activeDoc.id);
   }, [activeDoc]);
 
-  const saveChipClassName = useMemo(() => {
-    if (saveState === "error") {
-      return "status-chip status-error";
-    }
-
-    if (saveState === "saving") {
-      return "status-chip status-saving";
-    }
-
-    if (hasUnsavedChanges) {
-      return "status-chip status-pending";
-    }
-
-    return "status-chip status-saved";
-  }, [hasUnsavedChanges, saveState]);
-
   const saveLabel = useMemo(() => {
     if (!activeDoc) {
       return "未选择文档";
@@ -377,7 +361,7 @@ export default function WorkspacePage() {
   }, [activeDoc, hasUnsavedChanges, saveState]);
 
   return (
-    <main className="workspace-main">
+    <main className="site-page workspace-main particle-bg">
       {loadError ? <p className="error-banner">{loadError}</p> : null}
 
       {isLoading ? (
@@ -385,10 +369,10 @@ export default function WorkspacePage() {
       ) : (
         <div className="workspace-grid">
           <aside className="workspace-sidebar" aria-label="Document list">
-            <div className="workspace-header">
+            <div className="workspace-header stagger-rise-1">
               <div className="workspace-header-title">
                 <strong>文档列表</strong>
-                <span>{docs.length} 篇</span>
+                <span className="workspace-count">{docs.length} 篇</span>
               </div>
 
               <div className="workspace-actions">
@@ -415,11 +399,12 @@ export default function WorkspacePage() {
             </div>
 
             <div className="workspace-doc-list">
-              {docs.map((doc) => (
+              {docs.map((doc, index) => (
                 <button
                   key={doc.id}
-                  className={`doc-item ${doc.id === activeDocId ? "is-active" : ""}`}
+                  className={`doc-item stagger-rise-2 ${doc.id === activeDocId ? "is-active" : ""}`}
                   onClick={() => handleSelectDoc(doc.id)}
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <span className="doc-item-title">{doc.title.trim() || NEW_DOC_TITLE}</span>
                   <span className="doc-item-time">更新于 {formatTime(doc.updatedAt)}</span>
@@ -448,8 +433,8 @@ export default function WorkspacePage() {
 
             <section className={`editor-pane ${mobilePane === "editor" ? "is-visible" : ""}`}>
               <div className="pane-header">
-                <span>Editor</span>
-                <span>{activeDoc ? `${activeDoc.content.length} chars` : ""}</span>
+                <span className="pane-title">Editor</span>
+                <span className="pane-meta">{activeDoc ? `${activeDoc.content.length} chars` : ""}</span>
               </div>
 
               <div className="editor-body">
@@ -473,8 +458,8 @@ export default function WorkspacePage() {
 
             <section className={`preview-pane ${mobilePane === "preview" ? "is-visible" : ""}`}>
               <div className="pane-header">
-                <span>Preview</span>
-                <span>{activeDoc ? formatTime(activeDoc.updatedAt) : ""}</span>
+                <span className="pane-title">Preview</span>
+                <span className="pane-meta">{activeDoc ? formatTime(activeDoc.updatedAt) : ""}</span>
               </div>
 
               <div className="preview-body">
@@ -485,7 +470,12 @@ export default function WorkspacePage() {
                     </ReactMarkdown>
                   </article>
                 ) : (
-                  <p className="preview-empty">在左侧输入 Markdown，右侧会实时预览。</p>
+                  <div className="preview-empty">
+                    <div className="preview-empty-content">
+                      <p>在左侧输入 Markdown，右侧会实时预览</p>
+                      <small>支持标题、列表、代码块、表格等</small>
+                    </div>
+                  </div>
                 )}
               </div>
             </section>

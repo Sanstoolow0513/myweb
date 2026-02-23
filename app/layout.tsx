@@ -1,24 +1,28 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, IBM_Plex_Sans, Playfair_Display } from "next/font/google";
+import { Inter, JetBrains_Mono, Cal_Sans } from "next/font/google";
 import ThemeSync from "./theme-sync";
+import ThemeToggle from "./theme-toggle";
 import "./globals.css";
 
-const bodyFont = IBM_Plex_Sans({
-  variable: "--font-body",
-  weight: ["400", "500", "600"],
+const bodyFont = Inter({
+  variable: "--font-sans",
+  weight: ["300", "400", "500", "600", "700"],
   subsets: ["latin"],
+  display: "swap",
 });
 
-const monoFont = IBM_Plex_Mono({
+const monoFont = JetBrains_Mono({
   variable: "--font-mono",
-  weight: ["400", "500"],
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
+  display: "swap",
 });
 
-const displayFont = Playfair_Display({
+const displayFont = Cal_Sans({
   variable: "--font-display",
-  weight: ["500", "700"],
+  weight: "400",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -37,7 +41,17 @@ export default function RootLayout({
         className={`${bodyFont.variable} ${monoFont.variable} ${displayFont.variable} app-body`}
       >
         <ThemeSync />
-        {children}
+        <nav className="nav-header">
+          <div className="nav-logo">
+            <span>./</span>sanstoolow
+          </div>
+          <div className="nav-actions">
+            <ThemeToggle />
+          </div>
+        </nav>
+        <div style={{ paddingTop: "80px" }}>
+          {children}
+        </div>
       </body>
     </html>
   );

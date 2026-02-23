@@ -44,15 +44,15 @@ const UPDATES = [
 
 export default function HomePage() {
   return (
-    <main className="stagger-rise-1">
+    <main className="site-page home-page particle-bg">
       <div className="shell">
         <section className="hero-section">
-          <span className="hero-kicker">./sanstoolow</span>
-          <h1 className="hero-title">Sanstoolow 小站</h1>
-          <p className="hero-subtitle">
+          <span className="hero-kicker stagger-rise-1">./sanstoolow</span>
+          <h1 className="hero-title stagger-rise-2">Sanstoolow 小站</h1>
+          <p className="hero-subtitle stagger-rise-3">
             在这里记录构建过程，也保留日常创作入口。Blog 用来沉淀内容，Workspace 用来快速起草与整理。
           </p>
-          <div className="hero-actions">
+          <div className="hero-actions stagger-rise-4">
             <Link className="btn btn-primary" href="/blog">
               进入 Blog →
             </Link>
@@ -67,7 +67,7 @@ export default function HomePage() {
             {ENTRIES.map((entry, index) => (
               <article
                 key={entry.title}
-                className="card entry-card stagger-rise-2"
+                className="entry-card stagger-rise-2"
                 data-index={`0${index + 1}`}
               >
                 <h2>{entry.title}</h2>
@@ -87,8 +87,12 @@ export default function HomePage() {
           </div>
 
           <div className="updates-list">
-            {UPDATES.map((item) => (
-              <div key={`${item.date}-${item.text}`} className="update-item">
+            {UPDATES.map((item, index) => (
+              <div
+                key={`${item.date}-${item.text}`}
+                className="update-item stagger-rise-3"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
                 <span className="update-date">{item.date}</span>
                 <span className="update-text">{item.text}</span>
               </div>

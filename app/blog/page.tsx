@@ -54,7 +54,7 @@ const TOPICS = ["Frontend", "Engineering", "Learning Notes", "Design Thinking"];
 
 export default function BlogPage() {
   return (
-    <main className="stagger-rise-1">
+    <main className="site-page blog-page particle-bg stagger-rise-1">
       <div className="shell">
         <nav className="blog-topbar" aria-label="Blog navigation">
           <Link className="btn btn-ghost" href="/">
