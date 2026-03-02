@@ -60,7 +60,7 @@ export default function BlogPage() {
           <Link className="btn btn-ghost" href="/">
             ← 返回首页
           </Link>
-          <Link className="btn btn-primary" href="/workspace">
+          <Link className="btn btn-primary" href="/markdown">
             打开 Workspace
           </Link>
         </nav>

@@ -140,6 +140,11 @@ export function updateDoc(
   return getDocById(id);
 }
 
+export function deleteDoc(id: string): boolean {
+  const result = getDb().prepare(`DELETE FROM docs WHERE id = ?`).run(id);
+  return result.changes > 0;
+}
+
 export function ensureSeedDoc(): void {
   const result = getDb().prepare(`SELECT COUNT(1) as count FROM docs`).get() as {
     count: number;

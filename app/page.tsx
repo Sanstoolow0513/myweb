@@ -16,7 +16,7 @@ const ENTRIES = [
   {
     title: "Workspace",
     description: "双栏 Markdown 工作台，支持自动保存与移动端切换预览。",
-    href: "/workspace",
+    href: "/markdown",
     action: "打开 Workspace",
   },
   {
@@ -56,7 +56,7 @@ export default function HomePage() {
             <Link className="btn btn-primary" href="/blog">
               进入 Blog →
             </Link>
-            <Link className="btn btn-secondary" href="/workspace">
+            <Link className="btn btn-secondary" href="/markdown">
               打开 Workspace
             </Link>
           </div>

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getDocById, updateDoc } from "@/lib/db";
+import { getDocById, updateDoc, deleteDoc } from "@/lib/db";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -68,6 +68,23 @@ export async function PATCH(request: Request, context: RouteContext) {
   } catch {
     return NextResponse.json(
       { error: "Unable to update document." },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(_request: Request, context: RouteContext) {
+  const { id } = await context.params;
+
+  try {
+    const success = deleteDoc(id);
+    if (!success) {
+      return NextResponse.json({ error: "Document not found." }, { status: 404 });
+    }
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json(
+      { error: "Unable to delete document." },
       { status: 500 },
     );
   }

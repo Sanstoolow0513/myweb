@@ -13,7 +13,7 @@ type Doc = {
 };
 
 type SaveState = "idle" | "saving" | "saved" | "error";
-type MobilePane = "editor" | "preview";
+type ViewMode = "split" | "editor" | "preview";
 type EditableField = "title" | "content";
 
 const NEW_DOC_TITLE = "Untitled note";
@@ -58,11 +58,11 @@ function formatTime(isoText: string): string {
   }).format(date);
 }
 
-export default function WorkspacePage() {
+export default function MarkdownPage() {
   const [docs, setDocs] = useState<Doc[]>([]);
   const [activeDocId, setActiveDocId] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<SaveState>("idle");
-  const [mobilePane, setMobilePane] = useState<MobilePane>("editor");
+  const [viewMode, setViewMode] = useState<ViewMode>("editor");
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -74,6 +74,18 @@ export default function WorkspacePage() {
   useEffect(() => {
     docsRef.current = docs;
   }, [docs]);
+
+  // Adjust viewMode based on window width to avoid squeezing
+  useEffect(() => {
+    const checkWidth = () => {
+      if (window.innerWidth < 1024 && viewMode === "split") {
+        setViewMode("editor");
+      }
+    };
+    window.addEventListener("resize", checkWidth);
+    checkWidth();
+    return () => window.removeEventListener("resize", checkWidth);
+  }, [viewMode]);
 
   const activeDoc = useMemo(
     () => docs.find((doc) => doc.id === activeDocId) ?? null,
@@ -314,7 +326,7 @@ export default function WorkspacePage() {
 
       setDocs((previous) => [newDoc, ...previous]);
       setActiveDocId(newDoc.id);
-      setMobilePane("editor");
+      setViewMode("editor");
       setSaveState("saved");
     } catch {
       setLoadError("新建文档失败，请稍后重试。");
@@ -322,6 +334,40 @@ export default function WorkspacePage() {
       setIsCreating(false);
     }
   }, [activeDocId, isCreating, saveDocNow]);
+
+  const handleDeleteDoc = useCallback(async (docId: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    
+    if (!window.confirm("确定要删除这篇文档吗？")) {
+      return;
+    }
+
+    if (saveTimerRef.current !== undefined && activeDocId === docId) {
+      window.clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = undefined;
+    }
+
+    try {
+      const response = await fetch(`/api/docs/${docId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Delete failed");
+      }
+
+      setDocs((previous) => {
+        const next = previous.filter((doc) => doc.id !== docId);
+        if (activeDocId === docId) {
+          setActiveDocId(next[0]?.id ?? null);
+        }
+        return next;
+      });
+      syncedSignaturesRef.current.delete(docId);
+    } catch {
+      alert("删除失败，请稍后重试。");
+    }
+  }, [activeDocId]);
 
   const handleManualSave = useCallback(() => {
     if (!activeDocId) {
@@ -384,13 +430,15 @@ export default function WorkspacePage() {
                     className="btn btn-secondary"
                     onClick={handleManualSave}
                     disabled={!activeDocId}
+                    style={{ minHeight: '36px', padding: '0 10px', fontSize: '0.75rem' }}
                   >
-                    立即保存
+                    保存
                   </button>
                   <button
                     className="btn btn-primary"
                     onClick={handleCreateDoc}
                     disabled={isCreating}
+                    style={{ minHeight: '36px', padding: '0 10px', fontSize: '0.75rem' }}
                   >
                     {isCreating ? "创建中..." : "新建"}
                   </button>
@@ -400,85 +448,149 @@ export default function WorkspacePage() {
 
             <div className="workspace-doc-list">
               {docs.map((doc, index) => (
-                <button
+                <div
                   key={doc.id}
                   className={`doc-item stagger-rise-2 ${doc.id === activeDocId ? "is-active" : ""}`}
                   onClick={() => handleSelectDoc(doc.id)}
-                  style={{ animationDelay: `${index * 50}ms` }}
+                  style={{ animationDelay: `${index * 50}ms`, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
                 >
-                  <span className="doc-item-title">{doc.title.trim() || NEW_DOC_TITLE}</span>
-                  <span className="doc-item-time">更新于 {formatTime(doc.updatedAt)}</span>
-                </button>
+                  <div style={{ overflow: 'hidden', flex: 1, marginRight: '10px' }}>
+                    <div className="doc-item-title">{doc.title.trim() || NEW_DOC_TITLE}</div>
+                    <div className="doc-item-time">更新于 {formatTime(doc.updatedAt)}</div>
+                  </div>
+                  <button 
+                    onClick={(e) => handleDeleteDoc(doc.id, e)}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: 'var(--text-tertiary)',
+                      cursor: 'pointer',
+                      padding: '4px',
+                      borderRadius: '4px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                    title="删除"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                  </button>
+                </div>
               ))}
             </div>
           </aside>
 
-          <div className="workspace-content">
-            <div className="mobile-switch" aria-label="View mode switch">
+          <div className="workspace-content" style={{ display: 'flex', flexDirection: 'column' }}>
+            <div className="view-switch-bar" style={{ display: 'flex', padding: '10px 20px', background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-primary)', gap: '10px', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.875rem', fontWeight: 600, marginRight: 'auto', fontFamily: 'var(--font-mono)' }}>视图模式:</span>
               <button
                 type="button"
-                className={`btn ${mobilePane === "editor" ? "is-active" : ""}`}
-                onClick={() => setMobilePane("editor")}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--border-primary)',
+                  background: viewMode === "editor" ? 'var(--accent-primary)' : 'var(--bg-elevated)',
+                  color: viewMode === "editor" ? 'var(--accent-text)' : 'var(--text-primary)',
+                  fontSize: '0.8rem',
+                  cursor: 'pointer',
+                  transition: 'all 200ms'
+                }}
+                onClick={() => setViewMode("editor")}
               >
-                编辑
+                📝 仅编辑
               </button>
               <button
                 type="button"
-                className={`btn ${mobilePane === "preview" ? "is-active" : ""}`}
-                onClick={() => setMobilePane("preview")}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--border-primary)',
+                  background: viewMode === "split" ? 'var(--accent-primary)' : 'var(--bg-elevated)',
+                  color: viewMode === "split" ? 'var(--accent-text)' : 'var(--text-primary)',
+                  fontSize: '0.8rem',
+                  cursor: 'pointer',
+                  transition: 'all 200ms'
+                }}
+                onClick={() => setViewMode("split")}
               >
-                预览
+                📖 双栏分屏
+              </button>
+              <button
+                type="button"
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--border-primary)',
+                  background: viewMode === "preview" ? 'var(--accent-primary)' : 'var(--bg-elevated)',
+                  color: viewMode === "preview" ? 'var(--accent-text)' : 'var(--text-primary)',
+                  fontSize: '0.8rem',
+                  cursor: 'pointer',
+                  transition: 'all 200ms'
+                }}
+                onClick={() => setViewMode("preview")}
+              >
+                👁️ 仅预览
               </button>
             </div>
 
-            <section className={`editor-pane ${mobilePane === "editor" ? "is-visible" : ""}`}>
-              <div className="pane-header">
-                <span className="pane-title">Editor</span>
-                <span className="pane-meta">{activeDoc ? `${activeDoc.content.length} chars` : ""}</span>
-              </div>
-
-              <div className="editor-body">
-                <input
-                  id="doc-title"
-                  className="editor-title-input"
-                  value={activeDoc?.title ?? ""}
-                  placeholder="Untitled note"
-                  onChange={(event) => updateActiveDoc("title", event.target.value)}
-                />
-
-                <textarea
-                  className="editor-textarea"
-                  value={activeDoc?.content ?? ""}
-                  spellCheck={false}
-                  onChange={(event) => updateActiveDoc("content", event.target.value)}
-                  placeholder="Write your markdown here..."
-                />
-              </div>
-            </section>
-
-            <section className={`preview-pane ${mobilePane === "preview" ? "is-visible" : ""}`}>
-              <div className="pane-header">
-                <span className="pane-title">Preview</span>
-                <span className="pane-meta">{activeDoc ? formatTime(activeDoc.updatedAt) : ""}</span>
-              </div>
-
-              <div className="preview-body">
-                {activeDoc?.content ? (
-                  <article className="markdown-preview">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {activeDoc.content}
-                    </ReactMarkdown>
-                  </article>
-                ) : (
-                  <div className="preview-empty">
-                    <div className="preview-empty-content">
-                      <p>在左侧输入 Markdown，右侧会实时预览</p>
-                      <small>支持标题、列表、代码块、表格等</small>
-                    </div>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'row', overflow: 'hidden' }}>
+              {(viewMode === "editor" || viewMode === "split") && (
+                <section className="editor-pane" style={{ flex: 1, borderRight: viewMode === "split" ? '1px solid var(--border-primary)' : 'none', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                  <div className="pane-header">
+                    <span className="pane-title">Editor</span>
+                    <span className="pane-meta">{activeDoc ? `${activeDoc.content.length} chars` : ""}</span>
                   </div>
-                )}
-              </div>
-            </section>
+
+                  <div className="editor-body">
+                    <input
+                      id="doc-title"
+                      className="editor-title-input"
+                      value={activeDoc?.title ?? ""}
+                      placeholder="Untitled note"
+                      onChange={(event) => updateActiveDoc("title", event.target.value)}
+                    />
+
+                    <textarea
+                      className="editor-textarea"
+                      value={activeDoc?.content ?? ""}
+                      spellCheck={false}
+                      onChange={(event) => updateActiveDoc("content", event.target.value)}
+                      placeholder="Write your markdown here..."
+                      style={{ height: '100%', resize: 'none' }}
+                    />
+                  </div>
+                </section>
+              )}
+
+              {(viewMode === "preview" || viewMode === "split") && (
+                <section className="preview-pane" style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                  <div className="pane-header">
+                    <span className="pane-title">Preview</span>
+                    <span className="pane-meta">{activeDoc ? formatTime(activeDoc.updatedAt) : ""}</span>
+                  </div>
+
+                  <div className="preview-body" style={{ height: '100%', overflowY: 'auto' }}>
+                    {activeDoc?.content ? (
+                      <article className="markdown-preview">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {activeDoc.content}
+                        </ReactMarkdown>
+                      </article>
+                    ) : (
+                      <div className="preview-empty">
+                        <div className="preview-empty-content">
+                          <p>在左侧输入 Markdown，右侧会实时预览</p>
+                          <small>支持标题、列表、代码块、表格等</small>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </section>
+              )}
+            </div>
           </div>
         </div>
       )}

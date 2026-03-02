@@ -49,9 +49,7 @@ export default function RootLayout({
             <ThemeToggle />
           </div>
         </nav>
-        <div style={{ paddingTop: "80px" }}>
-          {children}
-        </div>
+        {children}
       </body>
     </html>
   );
